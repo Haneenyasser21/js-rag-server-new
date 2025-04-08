@@ -17,7 +17,6 @@ const embeddings = new OpenAIEmbeddings({
   openAIApiKey: process.env.OPENAI_API_KEY,
 });
 
-// Function to sanitize metadata for Pinecone
 function sanitizeMetadata(metadata) {
   const sanitized = {};
   for (const [key, value] of Object.entries(metadata)) {
@@ -26,9 +25,7 @@ function sanitizeMetadata(metadata) {
     } else if (Array.isArray(value) && value.every((item) => typeof item === "string")) {
       sanitized[key] = value;
     } else {
-      // Convert unsupported types to strings or skip them
       if (key === "loc" && typeof value === "object") {
-        // Skip the 'loc' field since it contains nested objects
         continue;
       }
       sanitized[key] = String(value);
