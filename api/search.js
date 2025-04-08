@@ -29,42 +29,53 @@ async function embedQueryWithTimeout(query, timeoutMs = 5000) {
 }
 
 export default async function handler(req, res) {
-  console.log("Handler invoked with request:", req.method, req.query);
+    // Add CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*'); // Allow all origins (or specify your Wix origin)
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS'); // Allow GET and OPTIONS methods
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type'); // Allow Content-Type header
 
-  if (req.method !== "GET") {
-    console.log("Method not allowed:", req.method);
-    return res.status(405).json({ error: "Method not allowed" });
-  }
+    // Handle preflight OPTIONS request
+    if (req.method === 'OPTIONS') {
+        res.status(200).end();
+        return;
+    }
 
-  const query = req.query.q;
-  if (!query) {
-    console.log("Query parameter 'q' is missing");
-    return res.status(400).json({ error: "Query parameter 'q' is required" });
-  }
+    console.log("Handler invoked with request:", req.method, req.query);
 
-  try {
-    console.time("embedQuery");
-    const queryEmbedding = await embedQueryWithTimeout(query, 5000);
-    console.timeEnd("embedQuery");
+    if (req.method !== "GET") {
+        console.log("Method not allowed:", req.method);
+        return res.status(405).json({ error: "Method not allowed" });
+    }
 
-    console.time("similaritySearch");
-    const results = await index.query({
-      vector: queryEmbedding,
-      topK: 3,
-      includeMetadata: true,
-    });
-    console.timeEnd("similaritySearch");
+    const query = req.query.q;
+    if (!query) {
+        console.log("Query parameter 'q' is missing");
+        return res.status(400).json({ error: "Query parameter 'q' is required" });
+    }
 
-    console.log("Query results:", results.matches.length, "matches found");
+    try {
+        console.time("embedQuery");
+        const queryEmbedding = await embedQueryWithTimeout(query, 5000);
+        console.timeEnd("embedQuery");
 
-    res.status(200).json(
-      results.matches.map((match) => ({
-        content: match.metadata.text || "No content available",
-        metadata: match.metadata,
-      }))
-    );
-  } catch (error) {
-    console.error("Error in handler:", error.message, error.stack);
-    res.status(500).json({ error: error.message });
-  }
+        console.time("similaritySearch");
+        const results = await index.query({
+            vector: queryEmbedding,
+            topK: 3,
+            includeMetadata: true,
+        });
+        console.timeEnd("similaritySearch");
+
+        console.log("Query results:", results.matches.length, "matches found");
+
+        res.status(200).json(
+            results.matches.map((match) => ({
+                content: match.metadata.text || "No content available",
+                metadata: match.metadata,
+            }))
+        );
+    } catch (error) {
+        console.error("Error in handler:", error.message, error.stack);
+        res.status(500).json({ error: error.message });
+    }
 }
