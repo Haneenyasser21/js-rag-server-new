@@ -1,0 +1,15 @@
+{
+  "name": "js-rag-server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@langchain/openai": "latest",
+    "@pinecone-database/pinecone": "latest",
+    "dotenv": "latest",
+    "langchain": "latest"
+  }
+}
