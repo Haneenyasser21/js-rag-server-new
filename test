@@ -1,0 +1,27 @@
+import handler from './api/search.js';
+
+// Simulate a POST request
+const req = {
+  method: "POST",
+  body: {
+    pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+  },
+  query: {}
+};
+
+// Simulate a response object
+const res = {
+  status: (code) => {
+    console.log(`Status: ${code}`);
+    return res;
+  },
+  json: (data) => {
+    console.log("Response:", data);
+  },
+  setHeader: (key, value) => {
+    console.log(`Set Header: ${key}: ${value}`);
+  }
+};
+
+// Call the handler
+handler(req, res);
