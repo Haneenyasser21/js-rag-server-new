@@ -10,6 +10,8 @@
     "@langchain/openai": "latest",
     "@pinecone-database/pinecone": "latest",
     "dotenv": "latest",
-    "langchain": "latest"
-  }
+    "langchain": "latest",
+    "node-fetch": "^2.6.1"
+  
+}
 }
