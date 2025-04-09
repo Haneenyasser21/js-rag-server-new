@@ -7,11 +7,11 @@
     "start": "node index.js"
   },
   "dependencies": {
+    "@langchain/community": "latest",
     "@langchain/openai": "latest",
     "@pinecone-database/pinecone": "latest",
     "dotenv": "latest",
     "langchain": "latest",
-    "node-fetch": "^2.6.1"
-  
-}
+    "node-fetch": "^3.3.2"
+  }
 }
