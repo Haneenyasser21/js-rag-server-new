@@ -2,7 +2,7 @@ import { config } from "dotenv";
 import { Pinecone } from "@pinecone-database/pinecone";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import fetch from "node-fetch";
-import { PDFLoader } from "langchain/document_loaders/fs/pdf";
+import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf"; // Correct import for latest version
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 
 config();
@@ -49,8 +49,7 @@ function sanitizeMetadata(metadata) {
 }
 
 export default async function handler(req, res) {
-    // Allow requests from Wix (or all origins for testing)
-    res.setHeader("Access-Control-Allow-Origin", "*"); // Change to specific Wix domain in production
+    res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
     res.setHeader("Access-Control-Allow-Credentials", "true");
@@ -61,7 +60,6 @@ export default async function handler(req, res) {
     }
 
     if (req.method === "POST") {
-        // Handle PDF ingestion
         const { pdfUrl } = req.body;
         if (!pdfUrl) {
             console.log("pdfUrl parameter is missing");
@@ -69,7 +67,6 @@ export default async function handler(req, res) {
         }
 
         try {
-            // Fetch the PDF
             console.log(`Fetching PDF from ${pdfUrl}`);
             const response = await fetch(pdfUrl);
             if (!response.ok) {
@@ -77,7 +74,6 @@ export default async function handler(req, res) {
             }
             const pdfBuffer = await response.buffer();
 
-            // Load and split the PDF
             console.log("Loading PDF...");
             const loader = new PDFLoader(pdfBuffer);
             const docs = await loader.load();
@@ -89,7 +85,6 @@ export default async function handler(req, res) {
             const chunks = await splitter.splitDocuments(docs);
             console.log(`Split into ${chunks.length} chunks`);
 
-            // Embed and upsert to Pinecone
             const vectors = [];
             for (let i = 0; i < chunks.length; i++) {
                 const chunk = chunks[i];
@@ -97,7 +92,7 @@ export default async function handler(req, res) {
                 const embedding = await embeddings.embedQuery(chunk.pageContent);
                 const sanitizedMetadata = sanitizeMetadata(chunk.metadata || {});
                 vectors.push({
-                    id: `chunk-${Date.now()}-${i}`, // Unique ID for each chunk
+                    id: `chunk-${Date.now()}-${i}`,
                     values: embedding,
                     metadata: { text: chunk.pageContent, source: pdfUrl, ...sanitizedMetadata },
                 });
@@ -113,7 +108,6 @@ export default async function handler(req, res) {
             res.status(500).json({ error: error.message });
         }
     } else if (req.method === "GET") {
-        // Handle query (existing logic)
         const query = req.query.q;
         if (!query) {
             console.log("Query parameter 'q' is missing");
