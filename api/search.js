@@ -72,10 +72,12 @@ export default async function handler(req, res) {
             if (!response.ok) {
                 throw new Error(`Failed to fetch PDF: ${response.statusText}`);
             }
-            const pdfBuffer = await response.buffer();
+            const pdfArrayBuffer = await response.arrayBuffer();
+
+            const pdfBlob = new Blob([pdfArrayBuffer], { type: "application/pdf" }); // Convert to Blob
 
             console.log("Loading PDF...");
-            const loader = new PDFLoader(pdfBuffer);
+            const loader = new PDFLoader(pdfBlob); // Pass Blob to PDFLoader
             const docs = await loader.load();
 
             const splitter = new RecursiveCharacterTextSplitter({
